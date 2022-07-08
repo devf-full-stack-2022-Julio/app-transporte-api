@@ -7,5 +7,5 @@ app.get('/', (req, res) => {
 })
 
 app.listen(PORT, () => {
-  console.log(`El servidor esta corriendo exitosamente en http://localhost:${PORT} ✅`)
+  console.log(`El servidor esta corriendo exitosamente en http://localhost:${PORT} 🚀`)
 })
