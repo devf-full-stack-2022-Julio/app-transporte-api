@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/devf-full-stack-2022-Julio/app-transporte-api/issues"
   },
-  "homepage": "https://github.com/devf-full-stack-2022-Julio/app-transporte-api#readme"
+  "homepage": "https://github.com/devf-full-stack-2022-Julio/app-transporte-api#readme",
+  "dependencies": {
+    "express": "^4.18.1"
+  }
 }
