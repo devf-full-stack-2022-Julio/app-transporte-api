@@ -44,7 +44,7 @@ function saveToken(email, token) {
     throw new Error('user not found')
   }
   
-  const updatedUser = { session_token: token, ...userFound }
+  const updatedUser = { ...userFound, session_token: token }
   
   const newUsers = users.map((u) => {
     if (u.email === updatedUser.email) {
@@ -56,10 +56,18 @@ function saveToken(email, token) {
   fs.writeFileSync('database.json', jsonData)
 }
 
+function getUser(email) {
+  const data = fs.readFileSync('database.json')
+  const { users } = JSON.parse(data)
+  const userFound = users.find((user) => user.email === email)
+  return userFound || null
+}
+
 module.exports = {
   users: {
     create: createUser,
     login: loginUser,
-    saveToken: saveToken
+    saveToken: saveToken,
+    getUser
   }
 }

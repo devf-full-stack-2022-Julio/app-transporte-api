@@ -41,9 +41,17 @@ function userRegister(req, res) {
   return res.status(200).json(createdUser)
 }
 
+function userInfo(req, res) {
+  const user = req.user
+  if (!user) throw new Error('missing user in req')
+
+  res.status(200).json({ email: user.email });
+}
+
 module.exports = {
   users: {
     login: userLogin,
-    register: userRegister 
+    register: userRegister,
+    getInfo: userInfo
   }
 }
