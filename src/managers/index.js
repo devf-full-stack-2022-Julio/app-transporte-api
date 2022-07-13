@@ -35,9 +35,31 @@ function loginUser(email, password) {
   return userFound;
 }
 
+function saveToken(email, token) {
+  const data = fs.readFileSync('database.json')
+  const { users } = JSON.parse(data)
+  const userFound = users.find((user) => user.email === email)
+
+  if (!userFound) {
+    throw new Error('user not found')
+  }
+  
+  const updatedUser = { session_token: token, ...userFound }
+  
+  const newUsers = users.map((u) => {
+    if (u.email === updatedUser.email) {
+      return updatedUser;
+    }
+    return u
+  })
+  const jsonData = JSON.stringify({ users: newUsers })
+  fs.writeFileSync('database.json', jsonData)
+}
+
 module.exports = {
   users: {
     create: createUser,
-    login: loginUser
+    login: loginUser,
+    saveToken: saveToken
   }
 }
