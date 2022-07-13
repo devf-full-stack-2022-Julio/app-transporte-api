@@ -1,13 +1,5 @@
 const managers = require('../managers')
-
-function generateToken(email, password) {
-  if (!email) throw new Error('missing email')
-  if (!password) throw new Error('missing password')
-
-  const timestamp = new Date().getTime()
-  const token = `${timestamp}_${email}_${password}`
-  return token;
-}
+const utils = require('../utils');
 
 function userLogin(req, res) {
   const { email, password } = req.body
@@ -20,7 +12,7 @@ function userLogin(req, res) {
   }
 
   // Generar una llave de sesión
-  const sessionToken = generateToken(loggedUser.email, loggedUser.password)
+  const sessionToken = utils.generateToken(loggedUser.email, loggedUser.password)
 
   // Guardar en el usuario 
   managers.users.saveToken(loggedUser.email, sessionToken)
