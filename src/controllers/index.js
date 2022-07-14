@@ -4,6 +4,10 @@ const utils = require('../utils');
 function userLogin(req, res) {
   const { email, password } = req.body
 
+  // Validar data
+  if (!email) return res.status(400).json({ message: 'missing email in body'})
+  if (!password) return res.status(400).json({ message: 'missing password in body'})
+
   let loggedUser = null
   try {
     loggedUser = managers.users.login(email, password)
