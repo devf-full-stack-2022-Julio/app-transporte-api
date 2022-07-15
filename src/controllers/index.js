@@ -21,6 +21,8 @@ function userLogin(req, res) {
   // Guardar en el usuario 
   managers.users.saveToken(loggedUser.email, sessionToken)
 
+  delete loggedUser.password
+  delete loggedUser.session_token
   return res.status(200).json({ token: sessionToken, user: loggedUser })
 }
 

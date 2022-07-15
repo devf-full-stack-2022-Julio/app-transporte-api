@@ -1,5 +1,6 @@
 const path = require('path')
 const fs = require('fs')
+const utils = require('../utils')
 
 function createUser(email, password) {
   const data = fs.readFileSync('database.json')
@@ -10,12 +11,15 @@ function createUser(email, password) {
     throw new Error('user already exists')
   }
 
-  const createdUser = { email, password }
+  const hashedPassword = utils.hashPassword(password)
+  console.log({ hashedPassword })
+  const createdUser = { email, password: hashedPassword }
   
   const newUsers = users.concat(createdUser)
   const jsonData = JSON.stringify({ users: newUsers })
   fs.writeFileSync('database.json', jsonData)
 
+  delete createdUser.password
   return createdUser
 }
 
@@ -28,11 +32,11 @@ function loginUser(email, password) {
     throw new Error('user not found')
   }
 
-  if (password !== userFound.password) {
+  if (!utils.verifyPassword(password, userFound.password)) {
     throw new Error('incorrect password')
   }
-
-  return userFound;
+  
+  return userFound
 }
 
 function saveToken(email, token) {
