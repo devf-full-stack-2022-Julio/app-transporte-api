@@ -1,77 +1,43 @@
 const path = require('path')
 const fs = require('fs')
 const utils = require('../utils')
+const user = require('../models/user')
 
-function createUser(email, password) {
-  const data = fs.readFileSync('database.json')
-  const { users } = JSON.parse(data)
-  const userFound = users.find((user) => user.email === email)
-
-  if (userFound) {
-    throw new Error('user already exists')
-  }
-
+async function createUser(email, password) {
   const hashedPassword = utils.hashPassword(password)
-  console.log({ hashedPassword })
-  const createdUser = { email, password: hashedPassword }
-  
-  const newUsers = users.concat(createdUser)
-  const jsonData = JSON.stringify({ users: newUsers })
-  fs.writeFileSync('database.json', jsonData)
-
-  delete createdUser.password
+  const createdUser = await user.create({ email, password: hashedPassword })
+  delete createdUser.dataValues.password
   return createdUser
 }
 
-function loginUser(email, password) {
-  const data = fs.readFileSync('database.json')
-  const { users } = JSON.parse(data)
-  const userFound = users.find((user) => user.email === email)
+async function loginUser(email, password) {
+  const loggedUser = await user.findOne({
+    where: {
+      email: email
+    }
+  })
 
-  if (!userFound) {
+  if (!loggedUser) {
     throw new Error('user not found')
   }
 
-  if (!utils.verifyPassword(password, userFound.password)) {
+  if (!utils.verifyPassword(password, loggedUser.password)) {
     throw new Error('incorrect password')
   }
   
-  return userFound
+  return loggedUser
 }
 
-function saveToken(email, token) {
-  const data = fs.readFileSync('database.json')
-  const { users } = JSON.parse(data)
-  const userFound = users.find((user) => user.email === email)
-
-  if (!userFound) {
-    throw new Error('user not found')
-  }
-  
-  const updatedUser = { ...userFound, session_token: token }
-  
-  const newUsers = users.map((u) => {
-    if (u.email === updatedUser.email) {
-      return updatedUser;
-    }
-    return u
-  })
-  const jsonData = JSON.stringify({ users: newUsers })
-  fs.writeFileSync('database.json', jsonData)
-}
-
-function getUser(email) {
-  const data = fs.readFileSync('database.json')
-  const { users } = JSON.parse(data)
-  const userFound = users.find((user) => user.email === email)
-  return userFound || null
+async function getUser(email) {
+  const requestedUser =  await user.findOne({ where: { email }})
+  delete requestedUser.dataValues.password
+  return requestedUser
 }
 
 module.exports = {
   users: {
     create: createUser,
     login: loginUser,
-    saveToken: saveToken,
     getUser
   }
 }

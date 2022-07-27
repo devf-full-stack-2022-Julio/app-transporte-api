@@ -1,7 +1,7 @@
 const managers = require('../managers')
 const utils = require('../utils');
 
-function userLogin(req, res) {
+async function userLogin(req, res) {
   const { email, password } = req.body
 
   // Validar data
@@ -10,7 +10,7 @@ function userLogin(req, res) {
 
   let loggedUser = null
   try {
-    loggedUser = managers.users.login(email, password)
+    loggedUser = await managers.users.login(email, password)
   } catch(err) {
       return res.status(402).json({ message: err.message })
   }
@@ -18,21 +18,24 @@ function userLogin(req, res) {
   // Generar una llave de sesión
   const sessionToken = utils.generateToken(loggedUser.email, loggedUser.password)
 
-  // Guardar en el usuario 
-  managers.users.saveToken(loggedUser.email, sessionToken)
-
-  delete loggedUser.password
-  delete loggedUser.session_token
+  delete loggedUser.dataValues.password
   return res.status(200).json({ token: sessionToken, user: loggedUser })
 }
 
-function userRegister(req, res) {
+async function userRegister(req, res) {
   const { email, password } = req.body
+
+  // Validar data
+  if (!email) return res.status(400).json({ message: 'missing email in body'})
+  if (!password) return res.status(400).json({ message: 'missing password in body'})
 
   let createdUser = null
   try {
-    createdUser = managers.users.create(email, password)
+    createdUser = await managers.users.create(email, password)
   } catch(err) {
+      if(err.name === 'SequelizeUniqueConstraintError') {
+        return res.status(403).json({ message: 'El usuario ya existe'})
+      }
       return res.status(403).json({ message: err.message })
   }
 
