@@ -5,6 +5,8 @@ async function createUser(email, password) {
   const hashedPassword = utils.hashPassword(password)
   const createdUser = await user.create({ email, password: hashedPassword })
   delete createdUser.dataValues.password
+  delete createdUser.dataValues.created_at
+
   return createdUser
 }
 
@@ -22,12 +24,15 @@ async function loginUser(email, password) {
   if (!utils.verifyPassword(password, loggedUser.password)) {
     throw new Error('incorrect password')
   }
+
+  delete loggedUser.dataValues.password
+  delete loggedUser.dataValues.created_at
   
   return loggedUser
 }
 
-async function getUser(email) {
-  const requestedUser =  await user.findOne({ where: { email }})
+async function getUser(userId) {
+  const requestedUser =  await user.findByPk(userId)
   delete requestedUser.dataValues.password
   return requestedUser
 }

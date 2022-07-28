@@ -1,4 +1,5 @@
 const managers = require('../managers')
+const verifyToken = require('../utils/verifyToken')
 
 async function authorization(req, res, next) {
   const { authorization } = req.headers;
@@ -10,17 +11,21 @@ async function authorization(req, res, next) {
     return res.status(401).json({ message: 'access denied'})
   }
 
-  const [timestamp, email, password] = token.split('_')
+  // Validar token
+  const verifiedToken = await verifyToken(token)
+  
+  if (!verifiedToken) {
+    return res.status(401).json({ message: 'access denied'}) 
+  }
 
-  const user = await managers.users.getUser(email);
+  const userId = verifiedToken.sub;
+
+  // El token es valido
+  const user = await managers.users.getUser(userId);
 
   if (!user) {
     return res.status(401).json({ message: 'access denied'}) 
   }
-
-  // if (user.session_token !== token || user.email !== email || user.password !== password) {
-  //   return res.status(401).json({ message: 'access denied'})
-  // }
 
   req.user = user 
   next()

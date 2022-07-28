@@ -18,6 +18,11 @@ const User = sequelize.define('user', {
     type: DataTypes.STRING,
     allowNull: false
   },
+  type: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'customer'
+  },
   created_at: {
     type: DataTypes.DATE,
     allowNull: false

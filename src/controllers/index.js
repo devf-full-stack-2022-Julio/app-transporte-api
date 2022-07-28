@@ -1,3 +1,4 @@
+const jwtDecode = require('jwt-decode')
 const managers = require('../managers')
 const utils = require('../utils');
 
@@ -16,10 +17,11 @@ async function userLogin(req, res) {
   }
 
   // Generar una llave de sesión
-  const sessionToken = utils.generateToken(loggedUser.email, loggedUser.password)
+  const sessionToken = utils.generateToken(loggedUser.id, loggedUser.type)
+  const decodedToken = jwtDecode(sessionToken)
+  const expiresAt = decodedToken.exp
 
-  delete loggedUser.dataValues.password
-  return res.status(200).json({ token: sessionToken, user: loggedUser })
+  return res.status(200).json({ token: sessionToken, user: loggedUser, expires: expiresAt })
 }
 
 async function userRegister(req, res) {
@@ -39,14 +41,22 @@ async function userRegister(req, res) {
       return res.status(403).json({ message: err.message })
   }
 
-  return res.status(200).json(createdUser)
+  // Generar una llave de sesión
+  const sessionToken = utils.generateToken(createdUser.id, createdUser.type)
+  const decodedToken = jwtDecode(sessionToken)
+  const expiresAt = decodedToken.exp
+
+
+  return res.status(200).json({ token: sessionToken, user: createdUser, expires: expiresAt })
 }
 
 function userInfo(req, res) {
   const user = req.user
   if (!user) throw new Error('missing user in req')
 
-  res.status(200).json({ email: user.email });
+  delete user.dataValues.created_at
+
+  res.status(200).json(user);
 }
 
 module.exports = {
